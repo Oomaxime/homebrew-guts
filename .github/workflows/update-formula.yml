@@ -1,0 +1,45 @@
+name: Update Guts Formula on Release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *' # check toutes les heures
+  repository_dispatch:
+    types: [new-release]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tap repo
+        uses: actions/checkout@v3
+
+      - name: Get latest release info
+        id: release
+        run: |
+          curl -s https://api.github.com/repos/Jeck0v/Guts/releases/latest > release.json
+          echo "version=$(jq -r .tag_name release.json)" >> $GITHUB_OUTPUT
+
+      - name: Download source archive
+        run: |
+          VERSION=${{ steps.release.outputs.version }}
+          curl -L -o guts.tar.gz https://github.com/Jeck0v/Guts/archive/refs/tags/${VERSION}.tar.gz
+          SHA256=$(shasum -a 256 guts.tar.gz | cut -d ' ' -f1)
+          echo "sha256=$SHA256" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_ENV
+
+      - name: Update formula
+        run: |
+          sed -i '' "s|url \".*\"|url \"https://github.com/Jeck0v/Guts/archive/refs/tags/${version}.tar.gz\"|" Formula/guts.rb
+          sed -i '' "s|sha256 \".*\"|sha256 \"${sha256}\"|" Formula/guts.rb
+
+      - name: Commit & Push
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git config user.name "homebrew-bot"
+          git config user.email "bot@example.com"
+          git add Formula/guts.rb
+          git commit -m "Update to Guts $version" || echo "No changes"
+          git push https://$GH_TOKEN@github.com/Oomaxime/homebrew-guts.git HEAD:main
