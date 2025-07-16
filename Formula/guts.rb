@@ -1,8 +1,8 @@
 class Guts < Formula
   desc "🧠 Git written in Rust (school project)"
   homepage "https://github.com/Jeck0v/Guts"
-  url "https://github.com/Jeck0v/Guts/archive/refs/tags/v1.0.2.tar.gz"
-  sha256 "edff9679c901e1f2edb10a8fc26e18ed91151f66b2a75ad9ea9edca92bda8b23"
+  url "https://github.com/Jeck0v/Guts/archive/refs/tags/v1.0.3.tar.gz"
+  sha256 "1420c3b910b62a782ac9a68fc21f88e100891fa7fb10889c427bce1b13272a74"
   license "MIT"
 
   depends_on "rust" => :build
